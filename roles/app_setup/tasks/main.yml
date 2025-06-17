@@ -24,72 +24,72 @@
     force: yes
   become: false
 
-- name: Ensure CLOUDSQL_CONNECTION_NAME is set
-  lineinfile:
-    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
-    regexp: '^CLOUDSQL_CONNECTION_NAME ='
-    line: 'CLOUDSQL_CONNECTION_NAME = "bustling-walker-461906-p1:us-central1:bookshelf-db"'
-
 - name: Update Flask app to listen on all interfaces
   replace:
     path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/main.py"
     regexp: "host=['\"]127\\.0\\.0\\.1['\"]"
     replace: "host='0.0.0.0'"
 
+- name: Ensure CLOUDSQL_CONNECTION_NAME is set
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: '^CLOUDSQL_CONNECTION_NAME ='
+    line: 'CLOUDSQL_CONNECTION_NAME = "{{ cloudsql_connection_name }}"'
+
 - name: Ensure CLOUDSQL_USER is set
   lineinfile:
     path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
     regexp: '^CLOUDSQL_USER ='
-    line: 'CLOUDSQL_USER = "bookshelf-user"'
+    line: 'CLOUDSQL_USER = "{{ db_user }}"'
 
 - name: Ensure CLOUDSQL_PASSWORD is set
   lineinfile:
     path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
     regexp: '^CLOUDSQL_PASSWORD ='
-    line: 'CLOUDSQL_PASSWORD = "admin"'
+    line: 'CLOUDSQL_PASSWORD = "{{ db_password }}"'
 
 - name: Ensure CLOUDSQL_DATABASE is set
   lineinfile:
     path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
     regexp: '^CLOUDSQL_DATABASE ='
-    line: 'CLOUDSQL_DATABASE = "bookshelf-database"'
+    line: 'CLOUDSQL_DATABASE = "{{ db_name }}"'
 
 - name: Ensure DATA_BACKEND is set
   lineinfile:
     path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
     regexp: '^DATA_BACKEND ='
-    line: 'DATA_BACKEND = "cloudsql"'
+    line: 'DATA_BACKEND = "{{ data_backend }}"'
 
 - name: Ensure PROJECT_ID is set
   lineinfile:
     path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
     regexp: '^PROJECT_ID ='
-    line: 'PROJECT_ID = "bustling-walker-461906-p1"'
+    line: 'PROJECT_ID = "{{ project_id }}"'
 
 - name: Ensure CLOUD_STORAGE_BUCKET is set
   lineinfile:
     path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
     regexp: '^CLOUD_STORAGE_BUCKET ='
-    line: 'CLOUD_STORAGE_BUCKET = "bookshelf-bucket"'
+    line: 'CLOUD_STORAGE_BUCKET = "{{ storage_bucket }}"'
 
-- name: Ensure GOOGLE_OAUTH2_CLIENT_ID is set correctly (handles multi-line)
+- name: Ensure GOOGLE_OAUTH2_CLIENT_ID is set
   lineinfile:
     path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
-    regexp: '^GOOGLE_OAUTH2_CLIENT_ID\s*=.*'
+    regexp: '^GOOGLE_OAUTH2_CLIENT_ID ='
     line: 'GOOGLE_OAUTH2_CLIENT_ID = "{{ client_id }}"'
-    backrefs: yes
-
-- name: Remove invalid stray config lines
-  lineinfile:
-    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
-    regexp: "^\\s*'your-client-id'"
-    state: absent
 
 - name: Ensure GOOGLE_OAUTH2_CLIENT_SECRET is set
   lineinfile:
     path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
     regexp: '^GOOGLE_OAUTH2_CLIENT_SECRET ='
     line: 'GOOGLE_OAUTH2_CLIENT_SECRET = "{{ client_secret }}"'
+
+
+- name: Remove invalid stray config lines
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: "^\\s*'your-client-id'"
+    state: absent
 
 - name: Install dependencies inside pyenv venv
   shell: |

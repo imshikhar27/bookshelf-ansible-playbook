@@ -1,0 +1,5 @@
+---
+# defaults file for roles/instance_config
+cloud_sql_proxy_path: /usr/local/bin/cloud_sql_proxy
+cloud_ops_script_url: https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
+cloud_ops_agent_script: add-google-cloud-ops-agent-repo.sh

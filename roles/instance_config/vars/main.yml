@@ -1,0 +1,3 @@
+---
+# vars file for roles/instance_config
+cloud_ops_agent_script: add-google-cloud-ops-agent-repo.sh

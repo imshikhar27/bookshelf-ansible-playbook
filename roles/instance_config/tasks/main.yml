@@ -1,0 +1,28 @@
+---
+# tasks file for roles/instance_config
+- name: Download Cloud Ops Agent script
+  get_url:
+    url: "{{ cloud_ops_script_url }}"
+    dest: "/tmp/{{ cloud_ops_agent_script }}"
+    mode: '0755'
+
+- name: Run Cloud Ops Agent installer
+  command: "bash /tmp/{{ cloud_ops_agent_script }} --also-install"
+  args:
+    creates: /opt/google-cloud-ops-agent
+  become: true
+
+- name: Download Cloud SQL Proxy binary if not already present
+  get_url:
+    url: "https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64"
+    dest: "/tmp/cloud-sql-proxy"
+    mode: '0777'
+    force: yes
+
+- name: Copy Cloud SQL Proxy binary
+  copy:
+    src: "/tmp/cloud-sql-proxy"
+    dest: "{{ cloud_sql_proxy_path }}"
+    mode: '0777'
+    remote_src: true
+  become: true

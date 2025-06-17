@@ -1,0 +1,15 @@
+---
+# defaults file for roles/app_setup
+cloudsql_connection_name: "bustling-walker-461906-p1:us-central1:bookshelf-db"
+db_user: "bookshelf-user"
+db_password: "admin"
+db_name: "bookshelf-database"
+data_backend: "cloudsql"
+project_id: "bustling-walker-461906-p1"
+storage_bucket: "bookshelf-bucket"
+client_id: "x"
+client_secret: "x"
+cloudsql_base_dir: "/cloudsql"
+db_socket_dir: "{{ cloudsql_base_dir }}"
+db_socket_path: "{{ db_socket_dir }}/{{ cloudsql_connection_name }}"
+cloudsql_log: "{{ db_socket_dir }}/cloudsql_proxy.log"

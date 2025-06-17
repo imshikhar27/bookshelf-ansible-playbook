@@ -1,0 +1,25 @@
+---
+# tasks file for roles/supervisor_setup
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: true
+
+- name: Install Supervisor
+  apt:
+    name: supervisor
+    state: present
+  become: true
+
+- name: Add Supervisor config for the app
+  template:
+    src: bookshelf.conf.j2
+    dest: /etc/supervisor/conf.d/bookshelf.conf
+  become: true
+
+- name: Reload and start app
+  shell: |
+    supervisorctl reread
+    supervisorctl update
+    supervisorctl start bookshelf
+  become: true

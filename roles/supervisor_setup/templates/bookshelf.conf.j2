@@ -1,0 +1,8 @@
+[program:bookshelf]
+command={{ pyenv_virtualenv_path }}/bin/python {{ app_path }}/main.py
+directory={{ app_path }}
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/bookshelf.err.log
+stdout_logfile=/var/log/bookshelf.out.log
+environment=HOME="{{ ansible_env.HOME }}",PYENV_ROOT="{{ pyenv_root }}",PATH="{{ pyenv_root }}/bin:{{ pyenv_virtualenv_path }}/bin:/usr/bin:/bin",GAE_INSTANCE=true,PYTHONUNBUFFERED=1

@@ -1,0 +1,129 @@
+---
+# tasks file for roles/app_setup
+- import_tasks: install_python35.yml
+
+- name: Ensure app directory is owned by the user
+  file:
+    path: "{{ ansible_env.HOME }}/getting-started-python"
+    state: directory
+    recurse: yes
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+  become: true
+
+
+- name: Mark the repo directory as safe for Git
+  command: git config --global --add safe.directory "{{ ansible_env.HOME }}/getting-started-python"
+  become: false
+
+- name: Clone application repo
+  git:
+    repo: "https://github.com/GoogleCloudPlatform/getting-started-python.git"
+    dest: "{{ ansible_env.HOME }}/getting-started-python"
+    version: steps
+    force: yes
+  become: false
+
+- name: Ensure CLOUDSQL_CONNECTION_NAME is set
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: '^CLOUDSQL_CONNECTION_NAME ='
+    line: 'CLOUDSQL_CONNECTION_NAME = "bustling-walker-461906-p1:us-central1:bookshelf-db"'
+
+- name: Update Flask app to listen on all interfaces
+  replace:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/main.py"
+    regexp: "host=['\"]127\\.0\\.0\\.1['\"]"
+    replace: "host='0.0.0.0'"
+
+- name: Ensure CLOUDSQL_USER is set
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: '^CLOUDSQL_USER ='
+    line: 'CLOUDSQL_USER = "bookshelf-user"'
+
+- name: Ensure CLOUDSQL_PASSWORD is set
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: '^CLOUDSQL_PASSWORD ='
+    line: 'CLOUDSQL_PASSWORD = "admin"'
+
+- name: Ensure CLOUDSQL_DATABASE is set
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: '^CLOUDSQL_DATABASE ='
+    line: 'CLOUDSQL_DATABASE = "bookshelf-database"'
+
+- name: Ensure DATA_BACKEND is set
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: '^DATA_BACKEND ='
+    line: 'DATA_BACKEND = "cloudsql"'
+
+- name: Ensure PROJECT_ID is set
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: '^PROJECT_ID ='
+    line: 'PROJECT_ID = "bustling-walker-461906-p1"'
+
+- name: Ensure CLOUD_STORAGE_BUCKET is set
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: '^CLOUD_STORAGE_BUCKET ='
+    line: 'CLOUD_STORAGE_BUCKET = "bookshelf-bucket"'
+
+- name: Ensure GOOGLE_OAUTH2_CLIENT_ID is set correctly (handles multi-line)
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: '^GOOGLE_OAUTH2_CLIENT_ID\s*=.*'
+    line: 'GOOGLE_OAUTH2_CLIENT_ID = "{{ client_id }}"'
+    backrefs: yes
+
+- name: Remove invalid stray config lines
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: "^\\s*'your-client-id'"
+    state: absent
+
+- name: Ensure GOOGLE_OAUTH2_CLIENT_SECRET is set
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"
+    regexp: '^GOOGLE_OAUTH2_CLIENT_SECRET ='
+    line: 'GOOGLE_OAUTH2_CLIENT_SECRET = "{{ client_secret }}"'
+
+- name: Install dependencies inside pyenv venv
+  shell: |
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
+    pyenv activate myenv35
+    pip install -r "$HOME/getting-started-python/7-gce/requirements.txt"
+  args:
+    executable: /bin/bash
+  become: false
+
+- name: Remove old socket files and logs from /cloudsql/cloudsql_connection_name
+  file:
+    path: "{{ db_socket_path }}"
+    state: absent
+  become: true
+
+- name: Recreate clean cloudsql directory
+  file:
+    path: "{{ cloudsql_base_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Start Cloud SQL Proxy if not already running
+  shell: |
+    nohup cloud_sql_proxy \
+      -dir="{{ db_socket_dir }}" \
+      -instances="{{ cloudsql_connection_name }}=unix:{{ db_socket_path }}" \
+      > "{{ cloudsql_log }}" 2>&1 &
+  args:
+    executable: /bin/bash
+  become: true
+  environment:
+    HOME: "{{ ansible_env.HOME }}"

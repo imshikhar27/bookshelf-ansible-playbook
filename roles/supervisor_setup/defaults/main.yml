@@ -1,0 +1,5 @@
+---
+# defaults file for roles/supervisor_setup
+pyenv_root: "{{ ansible_env.HOME }}/.pyenv"
+pyenv_virtualenv_path: "{{ pyenv_root }}/versions/myenv35"
+app_path: "{{ ansible_env.HOME }}/getting-started-python/7-gce"

@@ -1,0 +1,38 @@
+---
+# tasks file for roles/app_setup
+- import_tasks: install_python35.yml
+
+- name: Install Git
+  apt:
+    name: git
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Clone application repo
+  git:
+    repo: "https://github.com/GoogleCloudPlatform/getting-started-python.git"
+    dest: "/home/imshikhar27/getting-started-python"
+    version: steps
+    force: yes
+
+- name: Generate config.py
+  template:
+    src: config.py.j2
+    dest: "/home/imshikhar27/getting-started-python/7-gce/config.py"
+
+- name: Install virtualenv for Python 3.5
+  command: /usr/local/bin/python3.5 -m pip install virtualenv
+
+- name: Install dependencies in pyenv virtualenv
+  shell: |
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
+    pyenv activate bookshelf-venv
+    pip install --upgrade pip setuptools wheel
+    pip install -r /home/imshikhar27/getting-started-python/7-gce/requirements.txt
+  args:
+    executable: /bin/bash

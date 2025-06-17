@@ -1,0 +1,6 @@
+---
+# handlers file for roles/instance_config
+- name: restart cloud-sql-proxy
+  systemd:
+    name: cloud-sql-proxy
+    state: restarted

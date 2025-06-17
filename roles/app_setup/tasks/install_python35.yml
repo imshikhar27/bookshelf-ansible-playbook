@@ -73,7 +73,7 @@
     path: "{{ ansible_env.HOME }}/.bash_profile"
     line: '[[ -f ~/.bashrc ]] && source ~/.bashrc'
     state: present
-  become: false
+    create: yes
 
 - name: Check if pyenv virtualenv 'myenv35' exists
   stat:

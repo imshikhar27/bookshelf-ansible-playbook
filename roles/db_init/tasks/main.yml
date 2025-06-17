@@ -5,11 +5,10 @@
   shell: |
     export PYENV_ROOT="$HOME/.pyenv"
     export PATH="$PYENV_ROOT/bin:$PATH"
+    export GAE_INSTANCE="true"
     eval "$(pyenv init --path)"
     eval "$(pyenv init -)"
-    pyenv activate myenv35
-    export GAE_INSTANCE="dummy"
-    python "{{ ansible_env.HOME }}/getting-started-python/7-gce/bookshelf/model_cloudsql.py"
+    pyenv exec python "{{ ansible_env.HOME }}/getting-started-python/7-gce/bookshelf/model_cloudsql.py"
     sleep 3
   args:
     executable: /bin/bash

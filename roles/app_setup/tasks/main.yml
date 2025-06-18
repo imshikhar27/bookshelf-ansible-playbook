@@ -30,6 +30,31 @@
     regexp: "host=['\"]127\\.0\\.0\\.1['\"]"
     replace: "host='0.0.0.0'"
 
+- name: Comment out LOCAL_SQLALCHEMY_DATABASE_URI block
+  ansible.builtin.replace:
+    path: "{{ app_path }}/config.py"
+    regexp: |
+      LOCAL_SQLALCHEMY_DATABASE_URI\s*=\s*\(\s*['"].*?['"]\)\.format\([\s\S]*?\)
+    replace: |
+      # LOCAL_SQLALCHEMY_DATABASE_URI = (
+      #     'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{database}').format(
+      #         user=CLOUDSQL_USER, password=CLOUDSQL_PASSWORD,
+      #         database=CLOUDSQL_DATABASE)
+
+
+- name: Replace conditional GAE_INSTANCE block with static LIVE SQL URI
+  ansible.builtin.replace:
+    path: "{{ app_path }}/config.py"
+    regexp: |
+      if\s+os\.environ\.get\(['"]GAE_INSTANCE['"]\):\s*\n\s*SQLALCHEMY_DATABASE_URI\s*=\s*.*?\n\s*else:\s*\n\s*SQLALCHEMY_DATABASE_URI\s*=\s*.*?
+    replace: 'SQLALCHEMY_DATABASE_URI = LIVE_SQLALCHEMY_DATABASE_URI'
+
+- name: Debug print SQLALCHEMY_DATABASE_URI in config.py
+  ansible.builtin.replace:
+    path: "{{ app_path }}/config.py"
+    regexp: '^(SQLALCHEMY_DATABASE_URI\s*=\s*LIVE_SQLALCHEMY_DATABASE_URI)'
+    replace: '\1\nprint("SQLALCHEMY_DATABASE_URI =", SQLALCHEMY_DATABASE_URI)'
+    
 - name: Ensure CLOUDSQL_CONNECTION_NAME is set
   lineinfile:
     path: "{{ ansible_env.HOME }}/getting-started-python/7-gce/config.py"

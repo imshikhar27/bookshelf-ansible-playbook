@@ -8,7 +8,8 @@
     export GAE_INSTANCE="true"
     eval "$(pyenv init --path)"
     eval "$(pyenv init -)"
-    pyenv exec python "{{ ansible_env.HOME }}/getting-started-python/7-gce/bookshelf/model_cloudsql.py" >> "{{ ansible_env.HOME }}/init_cloudsql.log" 2>&1
+    pyenv activate myenv35 
+    python "{{ ansible_env.HOME }}/getting-started-python/7-gce/bookshelf/model_cloudsql.py" >> "{{ ansible_env.HOME }}/init_cloudsql.log" 2>&1
     sleep 3
   args:
     executable: /bin/bash

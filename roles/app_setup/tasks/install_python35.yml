@@ -36,17 +36,17 @@
 
 - name: Compile and install Python 3.5.10
   shell: |
-    cd /usr/src/Python-3.5.10
-    ./configure --enable-optimizations
-    make -j$(nproc)
-    make altinstall
+    cd /usr/src/Python-3.5.10 >> {{ ansible_env.HOME }}/pyenv_install.log 2>&1
+    ./configure --enable-optimizations >> {{ ansible_env.HOME }}/pyenv_install.log 2>&1
+    make -j$(nproc) >> {{ ansible_env.HOME }}/pyenv_install.log 2>&1
+    make altinstall >> {{ ansible_env.HOME }}/pyenv_install.log 2>&1
   args:
     creates: /usr/local/bin/python3.5
   become: true
 
 - name: Install pyenv using official installer
   shell: |
-    curl https://pyenv.run | bash
+    curl https://pyenv.run | bash  >> {{ ansible_env.HOME }}/pyenv_install.log 2>&1
   args:
     executable: /bin/bash
     chdir: "{{ ansible_env.HOME }}"
@@ -86,8 +86,8 @@
     export PATH="$PYENV_ROOT/bin:$PATH"
     eval "$(pyenv init --path)"
     eval "$(pyenv init -)"
-    pyenv install -s 3.5.10
-    pyenv virtualenv 3.5.10 myenv35
+    pyenv install -s 3.5.10  >> {{ ansible_env.HOME }}/pyenv_install.log 2>&1
+    pyenv virtualenv 3.5.10 myenv35  >> {{ ansible_env.HOME }}/pyenv_install.log 2>&1
   args:
     executable: /bin/bash
   become: false
@@ -100,8 +100,8 @@
     export PATH="$PYENV_ROOT/bin:$PATH"
     eval "$(pyenv init --path)"
     eval "$(pyenv init -)"
-    pyenv activate myenv35
-    python -m pip install --upgrade pip
+    pyenv activate myenv35  >> {{ ansible_env.HOME }}/pyenv_install.log 2>&1
+    python -m pip install --upgrade pip >> {{ ansible_env.HOME }}/pyenv_install.log 2>&1
   args:
     executable: /bin/bash
   become: false

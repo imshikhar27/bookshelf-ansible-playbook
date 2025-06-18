@@ -3,5 +3,4 @@
   roles:
     - instance_config
     - app_setup
-    - db_init
     - supervisor_setup
